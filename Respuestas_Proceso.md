@@ -107,26 +107,86 @@ after do
 end
 
 ```
-## Pregunta: (Para responder esta pregunta utiliza el repositorio y las actividades que has desarrollado de Introducción a Rails)
 
-    1. Modifique la lista de películas de la siguiente manera. Cada modificación va a necesitar que realice un cambio en una capa de abstracción diferente
-        a. Modifica la vista Index para incluir el número de fila de cada fila en la tabla de películas.
-        b. Modifica la vista Index para que cuando se sitúe el ratón sobre una fila de la tabla, dicha fila cambie temporalmente su color de fondo a amarillo u otro color.
-        c. Modifica la acción Index del controlador para que devuelva las películas ordenadas alfabéticamente por título, en vez de por fecha de lanzamiento. No intentes ordenar el resultado de la llamada que hace el controlador a la base de datos. Los gestores de bases de datos ofrecen formas para especificar el orden en que se quiere una lista de resultados y, gracias al fuerte acoplamiento entre ActiveRecord y el sistema gestor de bases de datos (RDBMS) que hay debajo, los métodos find y all de la biblioteca de ActiveRecord en Rails ofrece una manera de pedirle al RDBMS que haga esto.
-        d. Simula que no dispones de ese fuerte acoplamiento de ActiveRecord, y que no puedes asumir que el sistema de almacenamiento que hay por debajo pueda devolver la colección de ítems en un orden determinado. Modifique la acción Index del controlador para que devuelva las películas ordenadas alfabéticamente por título. Utiliza el método sort del módulo Enumerable de Ruby.
+Los ejercicios a partir de aquí se recomiendan hacerlos en orden.
+## Pregunta: (Para responder esta pregunta utiliza el repositorio y las actividades que has desarrollado de Introducción a Rails). Modifique la lista de películas de la siguiente manera. Cada modificación va a necesitar que realice un cambio en una capa de abstracción diferente
+
+### a. Modifica la vista Index para incluir el número de fila de cada fila en la tabla de películas.
+
+Necesitamos incorporar algunas líneas de código en nuestra vista  index.html.erb. En primer lugar en la sección de encabezado de la tabla agregamos una nueva columna con `<th>Nro</th>` . Con este cambio, la fila de encabezado de nuestra tabla constará de cinco columnas, como se muestra en el siguiente fragmento de código.
+
+``` ruby
+<thead>
+    <tr>
+      <th>Nro</th>
+      <th class="<%=@title_header_class%>" ><%= link_to "Movie Title", movies_path(sort: 'title', direction: toggle_direction('title'), ratings: hash_ratings(@ratings_to_show)), id: 'title_header' %></th>
+      <th>Rating</th>
+      <th class="<%=@release_date_header_class%>" ><%= link_to "Release Date", movies_path(sort: 'release_date', direction: toggle_direction('release_date'), ratings: hash_ratings(@ratings_to_show)), id: 'release_date_header' %></th>
+      <th>More Info</th>
+    </tr>
+  </thead>
+```
+
+Luego, en la parte del cuerpo `<tbody>` de la tabla HTML vamos recorrer la colección de películas (@movies) y generar las filas de datos correspondientes, pero esta vez enumerando las peliculas con `<%= movie.id %> que imprime el ID de la película en la celda correspondiente esto debido a  `<td>`. Quedando el fragmento de codigo de la siguiente manera:
+
+```ruby
+<tbody>
+    <% @movies.each do |movie| %>
+      <tr>
+        <td>
+         <%= movie.id %>
+        </td>
+        <td>
+          <%= movie.title %>
+        </td>
+        <td>
+          <%= movie.rating %>
+        </td>
+        <td>
+          <%= movie.release_date %>
+        </td>
+        <td>
+          <%= link_to "More about #{movie.title}", movie_path(movie) %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+```
+Ejecutamos rails server y nos muestra lo siguiente en el navegador :
+
+![Captura de pantalla de 2023-12-17 15-00-45](https://github.com/miguelvega/PracticaCalificada4/assets/124398378/a5ac9f7b-7c34-4f56-b28b-47077c592f7c)
+
+### b. Modifica la vista Index para que cuando se sitúe el ratón sobre una fila de la tabla, dicha fila cambie temporalmente su color de fondo a amarillo u otro color.
+
+Reemplazamos el uso de `<tr>` con `<%= content_tag :tr, class: 'row-hover', onmouseover: "this.style.backgroundColor='#FFFF00'", onmouseout: "this.style.backgroundColor=''" do %>`. Al emplear `content_tag`, tenemos la capacidad de añadir una clase `('row-hover')` que está vinculada a estilos CSS específicos, encargados de gestionar la apariencia de las filas cuando el cursor se sitúa sobre ellas. Además, hemos incorporado eventos de JavaScript (`onmouseover` y `onmouseout`) directamente en la definición de la etiqueta `<tr>`. Donde el evento `onmouseover` se activa cuando el puntero del mouse entra en el área de un elemento HTML y cambiara el color de fondo de una fila correspondiente a ese elemento de la tabla. En este caso el color se realiza mediante la instruccion `this.style.backgroundColor='#FFFF00'`, que establece el color de fondo en amarillo `(#FFFF00)`. Ahora bien, `onmouseout` hace la misma tarea pero cuando el mouse sale del elemento, por tal motivo lo utilizamos para revertir el cambio provocado por onmouseover. Quedando el codigo del cuerpo de la tabla de la siguiente manera:
+
+```ruby
+<tbody>
+    <% @movies.each do |movie| %>
+      <%= content_tag :tr, class: 'row-hover', onmouseover: "this.style.backgroundColor='#FFFF00'", onmouseout: "this.style.backgroundColor=''" do %>
+        <td>
+         <%= movie.id %>
+        </td>
+        <td>
+          <%= movie.title %>
+        </td>
+        <td>
+          <%= movie.rating %>
+        </td>
+        <td>
+          <%= movie.release_date %>
+        </td>
+        <td>
+          <%= link_to "More about #{movie.title}", movie_path(movie) %>
+        </td>
+      <% end %>
+    <% end %>
+  </tbody>
 
 ```
-%tbody
-    - @movies.each do |movie|
-      %tr
-        %td= movie.id
-        %td= movie.title
-        %td= movie.rating
-        %td= movie.release_date
-        %td= link_to "More about #{movie.title}", movie_path(movie)
+Ejecutamos rails server y vemos los cambios realizados:
 
-```
-![Captura de pantalla de 2023-11-29 09-52-36](https://github.com/miguelvega/PracticaCalificada4/assets/124398378/37cce2f4-7a79-4a42-9ca6-c29646ea9edd)
+![Captura de pantalla de 2023-12-17 16-04-13](https://github.com/miguelvega/PracticaCalificada4/assets/124398378/8c8c129c-1874-41f1-a455-163348c5aee1)
 
 
 
