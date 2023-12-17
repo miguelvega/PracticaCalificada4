@@ -156,6 +156,39 @@ Ejecutamos rails server y nos muestra lo siguiente en el navegador :
 
 ![Captura de pantalla de 2023-12-17 15-00-45](https://github.com/miguelvega/PracticaCalificada4/assets/124398378/a5ac9f7b-7c34-4f56-b28b-47077c592f7c)
 
+### b. Modifica la vista Index para que cuando se sitúe el ratón sobre una fila de la tabla, dicha fila cambie temporalmente su color de fondo a amarillo u otro color.
+
+Reemplazamos el uso de `<tr>` con `<%= content_tag :tr, class: 'row-hover', onmouseover: "this.style.backgroundColor='#FFFF00'", onmouseout: "this.style.backgroundColor=''" do %>`. Al emplear `content_tag`, tenemos la capacidad de añadir una clase `('row-hover')` que está vinculada a estilos CSS específicos, encargados de gestionar la apariencia de las filas cuando el cursor se sitúa sobre ellas. Además, hemos incorporado eventos de JavaScript (`onmouseover` y `onmouseout`) directamente en la definición de la etiqueta `<tr>`. Donde el evento `onmouseover` se activa cuando el puntero del mouse entra en el área de un elemento HTML y cambiara el color de fondo de una fila correspondiente a ese elemento de la tabla. En este caso el color se realiza mediante la instruccion `this.style.backgroundColor='#FFFF00'`, que establece el color de fondo en amarillo `(#FFFF00)`. Ahora bien, `onmouseout` hace la misma tarea pero cuando el mouse sale del elemento, por tal motivo lo utilizamos para revertir el cambio provocado por onmouseover. Quedando el codigo del cuerpo de la tabla de la siguiente manera:
+
+```ruby
+<tbody>
+    <% @movies.each do |movie| %>
+      <%= content_tag :tr, class: 'row-hover', onmouseover: "this.style.backgroundColor='#FFFF00'", onmouseout: "this.style.backgroundColor=''" do %>
+        <td>
+         <%= movie.id %>
+        </td>
+        <td>
+          <%= movie.title %>
+        </td>
+        <td>
+          <%= movie.rating %>
+        </td>
+        <td>
+          <%= movie.release_date %>
+        </td>
+        <td>
+          <%= link_to "More about #{movie.title}", movie_path(movie) %>
+        </td>
+      <% end %>
+    <% end %>
+  </tbody>
+
+```
+Ejecutamos rails server y vemos los cambios realizados:
+
+![Captura de pantalla de 2023-12-17 16-04-13](https://github.com/miguelvega/PracticaCalificada4/assets/124398378/8c8c129c-1874-41f1-a455-163348c5aee1)
+
+
 
 ###  ¿Qué sucede en JavaScript con el DIP en este ejemplo? 
 
