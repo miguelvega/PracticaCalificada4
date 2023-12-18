@@ -108,6 +108,10 @@ end
 
 ```
 
+###  ¿Qué sucede en JavaScript con el DIP en este ejemplo? 
+
+Sabemos que en JavaScript utiliza prototipos que permiten a los objetos heredar propiedades y métodos de otros objetos a través de su cadena de prototipos. Donde cada objeto tiene una propiedad privada que mantiene un enlace a otro objeto llamado su prototipo. Ese objeto prototipo tiene su propio prototipo, y así sucesivamente hasta que se alcanza un objeto cuyo prototipo es null. Ahora bien en este ejemplo al tener esta particularidad se tendria que pasar la dependecias mediante metodos mantiendo un enlace al realizar la prueba durante un día laboral.
+
 Los ejercicios a partir de aquí se recomiendan hacerlos en orden.
 ## Pregunta 2: (Para responder esta pregunta utiliza el repositorio y las actividades que has desarrollado de Introducción a Rails). Modifique la lista de películas de la siguiente manera. Cada modificación va a necesitar que realice un cambio en una capa de abstracción diferente
 
@@ -223,6 +227,8 @@ Veremos la lista de peliculas ordenada ascendentemente por titulo.
 
 ![Captura de pantalla de 2023-12-17 20-28-35](https://github.com/miguelvega/PracticaCalificada4/assets/124398378/9a130875-e1f2-403a-b278-da813584e706)
 
+
+
 ### Simula que no dispones de ese fuerte acoplamiento de ActiveRecord, y que no puedes asumir que el sistema de almacenamiento que hay por debajo pueda devolver la colección de ítems en un orden determinado. Modifique la acción Index del controlador para que devuelva las películas ordenadas alfabéticamente por título. Utiliza el método sort del módulo Enumerable de Ruby.
 
 
@@ -267,12 +273,10 @@ En resumen, order es específico de ActiveRecord y se utiliza para ordenar resul
 
 ![Captura de pantalla de 2023-12-18 01-13-43](https://github.com/miguelvega/PracticaCalificada4/assets/124398378/eb2fab40-750d-4e39-a8fa-45790820ca14)
 
-###  ¿Qué sucede en JavaScript con el DIP en este ejemplo? 
 
-Sabemos que en JavaScript utiliza prototipos que permiten a los objetos heredar propiedades y métodos de otros objetos a través de su cadena de prototipos. Donde cada objeto tiene una propiedad privada que mantiene un enlace a otro objeto llamado su prototipo. Ese objeto prototipo tiene su propio prototipo, y así sucesivamente hasta que se alcanza un objeto cuyo prototipo es null. Ahora bien en este ejemplo al tener esta particularidad se tendria que pasar la dependecias mediante metodos mantiendo un enlace al realizar la prueba durante un día laboral.
 
-## Pregunta: (para responder esta pregunta utiliza el repositorio y las actividades que has realizado de Rails avanzado, en particular asociaciones) - 2 puntos
+## Pregunta 3: (para responder esta pregunta utiliza el repositorio y las actividades que has realizado de Rails avanzado, en particular asociaciones) - 2 puntos
 
-1. Extienda el código del controlador del código siguiente dado con los métodos edit y update para las críticas. Usa un filtro de controlador para asegurarte de que un usuario sólo puede editar o actualizar sus propias críticas. Revisa el código dado en la evaluación y actualiza tus repositorios de actividades (no se admite nada nuevo aquí). Debes mostrar los resultados. 
+### 1. Extienda el código del controlador del código siguiente dado con los métodos edit y update para las críticas. Usa un filtro de controlador para asegurarte de que un usuario sólo puede editar o actualizar sus propias críticas. Revisa el código dado en la evaluación y actualiza tus repositorios de actividades (no se admite nada nuevo aquí). Debes mostrar los resultados. 
 
     
