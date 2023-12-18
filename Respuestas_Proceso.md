@@ -109,7 +109,7 @@ end
 ```
 
 Los ejercicios a partir de aquí se recomiendan hacerlos en orden.
-## Pregunta: (Para responder esta pregunta utiliza el repositorio y las actividades que has desarrollado de Introducción a Rails). Modifique la lista de películas de la siguiente manera. Cada modificación va a necesitar que realice un cambio en una capa de abstracción diferente
+## Pregunta 2: (Para responder esta pregunta utiliza el repositorio y las actividades que has desarrollado de Introducción a Rails). Modifique la lista de películas de la siguiente manera. Cada modificación va a necesitar que realice un cambio en una capa de abstracción diferente
 
 ### a. Modifica la vista Index para incluir el número de fila de cada fila en la tabla de películas.
 
