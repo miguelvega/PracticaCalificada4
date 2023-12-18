@@ -186,7 +186,42 @@ Reemplazamos el uso de `<tr>` con `<%= content_tag :tr, class: 'row-hover', onmo
 ```
 Ejecutamos rails server y vemos los cambios realizados:
 
-![Captura de pantalla de 2023-12-17 16-04-13](https://github.com/miguelvega/PracticaCalificada4/assets/124398378/8c8c129c-1874-41f1-a455-163348c5aee1)
+![Captura de pantalla de 2023-12-17 16-53-19](https://github.com/miguelvega/PracticaCalificada4/assets/124398378/f3f18199-46f6-47de-9ae5-b30c4c58d3e5)
+
+### c. Modifica la acción Index del controlador para que devuelva las películas ordenadas alfabéticamente por título, en vez de por fecha de lanzamiento. No intentes ordenar el resultado de la llamada que hace el controlador a la base de datos. Los gestores de bases de datos ofrecen formas para especificar el orden en que se quiere una lista de resultados y, gracias al fuerte acoplamiento entre ActiveRecord y el sistema gestor de bases de datos (RDBMS) que hay debajo, los métodos find y all de la biblioteca de ActiveRecord en Rails ofrece una manera de pedirle al RDBMS que haga esto.
+
+```ruby
+if params[:sort].present?
+  column_select = sort_column
+  direction_select = params[:direction]
+  if Movie.column_names.include?(params[:sort]) && ["asc", "desc"].include?(params[:direction])
+    @movies = @movies.order("#{column_select} #{direction_select}")
+  end
+  set_style_header column_select
+end
+
+```
+Explicamos el codigo : 
+
+. if params[:sort].present?: Verifica si se ha proporcionado un parámetro de ordenación (sort) en la solicitud.
+
+. column_select = sort_column: Utiliza el método privado sort_column para determinar la columna por la cual se ordenarán las películas. Este método verifica si la columna proporcionada es válida y devuelve la columna o una cadena vacía si no es válida.
+
+. direction_select = params[:direction]: Obtiene la dirección de ordenación (ascendente o descendente) proporcionada en los parámetros de la solicitud.
+
+. if Movie.column_names.include?(params[:sort]) && ["asc", "desc"].include?(params[:direction]): Verifica si la columna proporcionada es una columna válida y si la dirección proporcionada es válida.
+
+. @movies = @movies.order("#{column_select} #{direction_select}"): Si todas las condiciones son verdaderas, utiliza el método order para ordenar las películas según la columna y dirección especificadas.
+
+La ordenación está siendo manejada por el sistema gestor de bases de datos a través de la llamada @movies.order("#{column_select} #{direction_select}"), donde column_select se establece en la columna correspondiente (por ejemplo, 'title' si se ordena por título) para ordenar alfabéticamente por título cuando se proporciona un parámetro de ordenación válido (sort: 'title'). Esto se logra mediante el uso del método order de ActiveRecord. Entonces, no estamos intentando ordenar el resultado de la llamada a la base de datos en Ruby. En cambio, estás utilizando la funcionalidad integrada de ordenación proporcionada por ActiveRecord y el sistema gestor de bases de datos. Ademas, en nuestra acción index, estamos utilizando el método with_ratings para filtrar las películas y el método order para ordenarlas, ambos métodos de ActiveRecord que interactúan directamente con el RDBMS.
+
+Con si ejecutamos rails server y si tenemos la siguiente url :
+```
+http://localhost:3000/movies?direction=asc&ratings%5BG%5D=1&ratings%5BPG%5D=1&ratings%5BPG-13%5D=1&ratings%5BR%5D=1&sort=title
+```
+Veremos la lista de peliculas ordenada ascendentemente por titulo.
+
+![Captura de pantalla de 2023-12-17 20-28-35](https://github.com/miguelvega/PracticaCalificada4/assets/124398378/9a130875-e1f2-403a-b278-da813584e706)
 
 
 
