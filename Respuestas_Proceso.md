@@ -186,9 +186,86 @@ Reemplazamos el uso de `<tr>` con `<%= content_tag :tr, class: 'row-hover', onmo
 ```
 Ejecutamos rails server y vemos los cambios realizados:
 
-![Captura de pantalla de 2023-12-17 16-04-13](https://github.com/miguelvega/PracticaCalificada4/assets/124398378/8c8c129c-1874-41f1-a455-163348c5aee1)
+![Captura de pantalla de 2023-12-17 16-53-19](https://github.com/miguelvega/PracticaCalificada4/assets/124398378/f3f18199-46f6-47de-9ae5-b30c4c58d3e5)
+
+### c. Modifica la acción Index del controlador para que devuelva las películas ordenadas alfabéticamente por título, en vez de por fecha de lanzamiento. No intentes ordenar el resultado de la llamada que hace el controlador a la base de datos. Los gestores de bases de datos ofrecen formas para especificar el orden en que se quiere una lista de resultados y, gracias al fuerte acoplamiento entre ActiveRecord y el sistema gestor de bases de datos (RDBMS) que hay debajo, los métodos find y all de la biblioteca de ActiveRecord en Rails ofrece una manera de pedirle al RDBMS que haga esto.
+
+```ruby
+if params[:sort].present?
+  column_select = sort_column
+  direction_select = params[:direction]
+  if Movie.column_names.include?(params[:sort]) && ["asc", "desc"].include?(params[:direction])
+    @movies = @movies.order("#{column_select} #{direction_select}")
+  end
+  set_style_header column_select
+end
+
+```
+Explicamos el codigo : 
+
+- if params[:sort].present?: Verifica si se ha proporcionado un parámetro de ordenación (sort) en la solicitud.
+
+- column_select = sort_column: Utiliza el método privado sort_column para determinar la columna por la cual se ordenarán las películas. Este método verifica si la columna proporcionada es válida y devuelve la columna o una cadena vacía si no es válida.
+
+- direction_select = params[:direction]: Obtiene la dirección de ordenación (ascendente o descendente) proporcionada en los parámetros de la solicitud.
+
+- if Movie.column_names.include?(params[:sort]) && ["asc", "desc"].include?(params[:direction]): Verifica si la columna proporcionada es una columna válida y si la dirección proporcionada es válida.
+
+- @movies = @movies.order("#{column_select} #{direction_select}"): Si todas las condiciones son verdaderas, utiliza el método order para ordenar las películas según la columna y dirección especificadas.
+
+La ordenación está siendo manejada por el sistema gestor de bases de datos a través de la llamada @movies.order("#{column_select} #{direction_select}"), donde column_select se establece en la columna correspondiente (por ejemplo, 'title' si se ordena por título) para ordenar alfabéticamente por título cuando se proporciona un parámetro de ordenación válido (sort: 'title'). Esto se logra mediante el uso del método order de ActiveRecord. Entonces, no estamos intentando ordenar el resultado de la llamada a la base de datos en Ruby. En cambio, estás utilizando la funcionalidad integrada de ordenación proporcionada por ActiveRecord y el sistema gestor de bases de datos. Ademas, en nuestra acción index, estamos utilizando el método with_ratings para filtrar las películas y el método order para ordenarlas, ambos métodos de ActiveRecord que interactúan directamente con el RDBMS.
+
+Con si ejecutamos rails server y si tenemos la siguiente url :
+```
+http://localhost:3000/movies?direction=asc&ratings%5BG%5D=1&ratings%5BPG%5D=1&ratings%5BPG-13%5D=1&ratings%5BR%5D=1&sort=title
+```
+Veremos la lista de peliculas ordenada ascendentemente por titulo.
+
+![Captura de pantalla de 2023-12-17 20-28-35](https://github.com/miguelvega/PracticaCalificada4/assets/124398378/9a130875-e1f2-403a-b278-da813584e706)
+
+### Simula que no dispones de ese fuerte acoplamiento de ActiveRecord, y que no puedes asumir que el sistema de almacenamiento que hay por debajo pueda devolver la colección de ítems en un orden determinado. Modifique la acción Index del controlador para que devuelva las películas ordenadas alfabéticamente por título. Utiliza el método sort del módulo Enumerable de Ruby.
 
 
+```ruby
+ if Movie.column_names.include?(params[:sort]) && ["asc", "desc"].include?(params[:direction])
+        #@movies = @movies.order("#{column_select} #{direction_select}")
+         # Utilizamos el método sort del módulo Enumerable para ordenar alfabéticamente por título
+         @movies = @movies.sort_by { |movie| movie.send(column_select) }
+         @movies = @movies.reverse if direction_select == 'desc'
+  end
+
+```
+
+En este código, he reemplazado la parte de @movies = @movies.order("#{column_select} #{direction_select}") con @movies = @movies.sort_by { |movie| movie.send(column_select) } para utilizar el método sort_by del módulo Enumerable para ordenar la colección @movies según el valor de la columna especificada en column_select. Por ejemplo, si column_select es 'title', entonces movie.send(column_select) sería equivalente a movie.title. En otras palabras, la expresión { |movie| movie.send(column_select) } es un bloque que se ejecuta para cada elemento en @movies. En este bloque, se utiliza movie.send(column_select) para obtener el valor de la columna especificada dinámicamente para cada película. Después de ejecutar este bloque para cada película, el método sort_by ordena la colección en función de esos valores. La línea @movies = @movies.reverse if direction_select == 'desc' se encarga de invertir el orden si la dirección es 'desc', ya que cuando la ordenación es ascendente, utilizamos sort_by para ordenar las películas en orden alfabético, pero si la dirección es 'desc', necesitamos invertir el orden después de la ordenación para que las películas aparezcan en orden descendente.
+
+<br>
+
+order en ActiveRecord (en el contexto de bases de datos):
+
+- Uso: Se utiliza para ordenar los resultados de una consulta a la base de datos.
+- Cómo funciona: La ordenación se delega al sistema de gestión de bases de datos (DBMS), que realiza la ordenación directamente en la base de datos antes de devolver los resultados.
+- Consideraciones: Muy eficiente para grandes conjuntos de datos, ya que la ordenación se realiza a nivel de la base de datos.
+
+<br>
+sort_by en Ruby (en el contexto de colecciones de objetos):
+
+- Uso: Se utiliza para ordenar una colección de objetos en memoria.
+- Cómo funciona: Se proporciona un bloque que define el criterio de ordenación. Cada elemento de la colección se evalúa según este bloque y se ordena en consecuencia.
+-Consideraciones: Útil cuando deseas ordenar en función de un atributo específico o una lógica personalizada. Menos eficiente que order para grandes conjuntos de datos.
+
+<br>
+reverse en Ruby (en el contexto de colecciones de objetos):
+
+- Uso: Se utiliza para invertir el orden de los elementos en una colección.
+- Cómo funciona: Simplemente invierte el orden de los elementos, de modo que el primero se convierte en el último y viceversa.
+- Consideraciones: Útil después de aplicar una ordenación si deseas cambiar el orden de ascendente a descendente o viceversa.
+
+<br>
+En resumen, order es específico de ActiveRecord y se utiliza para ordenar resultados de bases de datos, mientras que sort_by y reverse son métodos de Ruby que se utilizan para ordenar y revertir el orden de colecciones en memoria. Estos últimos son más flexibles pero menos eficientes para grandes conjuntos de datos que requieren ordenación.
+
+<br>
+
+![Captura de pantalla de 2023-12-18 01-13-43](https://github.com/miguelvega/PracticaCalificada4/assets/124398378/eb2fab40-750d-4e39-a8fa-45790820ca14)
 
 ###  ¿Qué sucede en JavaScript con el DIP en este ejemplo? 
 
