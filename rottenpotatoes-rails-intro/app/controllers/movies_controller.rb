@@ -9,7 +9,7 @@ class MoviesController < ApplicationController
   def index
     @all_ratings = Movie.all_ratings
     @ratings_to_show = params[:ratings] || @all_ratings
-
+    
     if @ratings_to_show.is_a?(Hash)
       @ratings_to_show = @ratings_to_show.keys
     end
@@ -20,7 +20,10 @@ class MoviesController < ApplicationController
       column_select = sort_column
       direction_select = params[:direction]
       if Movie.column_names.include?(params[:sort]) && ["asc", "desc"].include?(params[:direction])
-        @movies = @movies.order("#{column_select} #{direction_select}")
+        #@movies = @movies.order("#{column_select} #{direction_select}")
+         # Utilizamos el método sort del módulo Enumerable para ordenar alfabéticamente por título
+         @movies = @movies.sort_by { |movie| movie.send(column_select) }
+         @movies = @movies.reverse if direction_select == 'desc'
       end
       set_style_header column_select
     end
