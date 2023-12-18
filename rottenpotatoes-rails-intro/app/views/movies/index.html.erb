@@ -27,7 +27,7 @@
     </tr>
   </thead>
   <tbody>
-    <% @movies.each do |movie| %>
+    <% Movie.all.each do |movie| %>
       <%= content_tag :tr, class: 'row-hover', onmouseover: "this.style.backgroundColor='#FFFF00'", onmouseout: "this.style.backgroundColor=''" do %>
         <td>
          <%= movie.id %>
