@@ -1,6 +1,12 @@
 class MoviesController < ApplicationController
   helper_method :sort_column, :sort_direction, :toggle_direction, :hash_ratings
   before_action :save_session_params, only: [:index]
+  before_action :load_movies, only: [:index]
+
+  def load_movies
+    @movies = Movie.all
+  end
+
   def show
     id = params[:id]
     @movie = Movie.find(id)
