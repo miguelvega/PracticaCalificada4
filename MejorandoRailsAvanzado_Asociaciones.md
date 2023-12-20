@@ -254,7 +254,88 @@ SELECT reviews.*
 ``` 
 La consulta SQL selecciona todas las columnas de la tabla "reviews" que están asociadas a la película con un id igual a 41 en la tabla "movies".
 
-Despues de ealizar la configuracion para trabajar con asociaciones entre modelos (Movie, Moviegoer, y Review) en nuestra aplicacion ejecutamos `rails console`
+
+(a): Creamos y aplica esta migración para crear la tabla Reviews. Las claves foraneas del nuevo modelo están relacionadas con las tablas movies y moviegoers existentes por convención sobre la configuración. 
+
+```
+# Run 'rails generate migration create_reviews' and then
+#   edit db/migrate/*_create_reviews.rb to look like this:
+class CreateReviews < ActiveRecord::Migration
+    def change
+        create_table 'reviews' do |t|
+        t.integer    'potatoes'
+        t.text       'comments'
+        t.references 'moviegoer'
+        t.references 'movie'
+        end
+    end
+end
+```
+
+b) Coloca este nuevo modelo de revisión en `app/models/review.rb`. 
+```
+class Review < ActiveRecord::Base
+    belongs_to :movie
+    belongs_to :moviegoer
+end
+```
+
+c) Coloca una copia de la siguiente línea en cualquier lugar dentro de la clase Movie Y dentro de la clase `Moviegoer` (idiomáticamente, debería ir justo después de 'class Movie' o 'class Moviegoer'), es decir realiza este cambio de una línea en cada uno de los archivos existentes `movie.rb` y `moviegoer.rb`.
+
+```
+has_many :reviews
+```
+
+Con lo cual nuestro archivo schema.rb quedara de la siguiente manera :
+
+![36_2](https://github.com/miguelvega/PracticaCalificada4/assets/124398378/31f39643-179f-4b91-a09d-c0b7a997b223)
+
+Tabla moviegoers:
+Campos:
+- name: Almacena el nombre del moviegoer.
+- provider: Utilizado para almacenar información sobre el proveedor de autenticación (por ejemplo, si se utiliza OAuth).
+- uid: Identificación única asociada al proveedor de autenticación.
+- created_at y updated_at: Registros de tiempo de creación y actualización respectivamente.
+
+
+Tabla movies:
+Campos:
+- title: Almacena el título de la película.
+- rating: Utilizado para almacenar el rating de la película (por ejemplo, PG-13, R, etc.).
+- description: Campo de texto para almacenar la descripción de la película.
+- release_date: Almacena la fecha de lanzamiento de la película.
+- created_at y updated_at: Registros de tiempo de creación y actualización respectivamente.
+
+Tabla reviews:
+Campos:
+- potatoes: Un campo entero que representa una puntuación o calificación asignada a la película en la revisión.
+- comments: Un campo de texto que almacena los comentarios o reseñas sobre la película.
+- moviegoer_id: Clave foránea que referencia al id de un moviegoer que ha realizado la revisión.
+- movie_id: Clave foránea que referencia al id de la película que está siendo revisada.
+- Índices:
+    - index_reviews_on_movie_id: Un índice en la columna movie_id para mejorar la velocidad de las consultas que involucran búsquedas por película.
+    - index_reviews_on_moviegoer_id: Un índice en la columna moviegoer_id para mejorar la velocidad de las consultas que involucran búsquedas por moviegoer.
+
+Donde t.index indica que se está creando un índice en la columna especificada, ["movie_id"] especifica la columna para la cual se está creando el índice. En este caso, es la columna movie_id y name: "index_reviews_on_movie_id" asigna un nombre al índice, que en este caso es "index_reviews_on_movie_id". Los nombres de índices son útiles para referenciarlos y gestionarlos posteriormente.
+
+
+Las relaciones entre las tablas son las siguientes:
+La tabla reviews tiene dos claves foráneas: moviegoer_id y movie_id. Estas se asocian con las tablas moviegoers y movies respectivamente.
+Un review está asociado a un moviegoer a través de la columna moviegoer_id.
+Un review está asociado a una movie a través de la columna movie_id.
+
+Estas relaciones indican que un moviegoer puede tener varias reviews y una review pertenece a un moviegoer. Del mismo modo, una movie puede tener varias reviews y una review pertenece a una movie.
+
+### Observacion : 
+La columna llamada id en las tablas se agrega automáticamente como una clave primaria a menos que se indique explícitamente lo contrario.
+En el esquema, cada una de las tablas (moviegoers, movies, y reviews) tiene un campo de tipo entero llamado id que sirve como clave primaria de la tabla. Aunque no está explícitamente escrito en nuestro esquema, Rails sigue la convención de nombres y asume que el campo id se utilizará como clave primaria.
+
+Por ejemplo, en la tabla reviews, las columnas moviegoer_id y movie_id se utilizan para establecer relaciones de clave foránea con las tablas moviegoers y movies, respectivamente. Estas relaciones se basan en la convención de que se espera que exista un campo llamado id en las tablas relacionadas (moviegoers y movies) que sirva como clave primaria.
+
+Así que, aunque no está explícitamente mencionado, se asume que cada tabla tiene un campo id que actúa como clave primaria y que se utiliza implícitamente en las relaciones de clave foránea. Esto es parte de las convenciones de Rails para simplificar el desarrollo, pero también puedes personalizar esto mediante migraciones si es necesario.
+
+
+Despues de realizar la configuracion para trabajar con asociaciones entre modelos (Movie, Moviegoer, y Review) en nuestra aplicacion ejecutamos `rails console`
 
 ![37](https://github.com/miguelvega/Rails-Avanzado/assets/124398378/77a41847-5756-44fa-b575-30bce0161488)
 
