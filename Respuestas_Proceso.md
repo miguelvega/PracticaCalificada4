@@ -374,6 +374,37 @@ Ejecutamos y vemos losm resultados:
 
 ### 2. Extienda la función de validación en ActiveModel  para generar automáticamente código JavaScript que valide las entradas del formulario antes de que sea enviado. Por ejemplo, puesto que el modelo Movie de RottenPotatoes requiere que el título de cada película sea distinto de la cadena vacía, el código JavaScript deberías evitar que el formulario “Add New Movie” se enviara si no se cumplen los criterios de validación, mostrar un mensaje de ayuda al usuario, y resaltar el(los) campo(s) del formulario que ocasionaron los problemas de validación. Gestiona, al menos, las validaciones integradas, como que los títulos sean distintos de cadena vacía, que las longitudes máximas y mínima de la cadena de caracteres sean correctas, que los valores numéricos estén dentro de los límites de los rangos, y para puntos adicionales, realiza las validaciones basándose en expresiones regulares.
 
+Agregamos las siguiente lineas de codigo en la parte final de nuestro archivo new.html.erb para evitar que el usuario agregue peliculas con los titulos en blanco. Estas validación que se estan agregando con el script JavaScript son del lado del cliente, en cambio las validaciones que se hicieron en el modelo en Rails en el archivo movie.rb generalmente se aplican en el lado del servidor.
+
+
+```
+
+<script>
+  document.querySelector('.form').addEventListener('submit', function (event) {
+    document.getElementById('movie_title').classList.remove('validation-error');
+    var title = document.querySelector('#movie_title').value;
+    if (title.trim() === '') {
+      alert('El título no puede estar vacío');
+      document.getElementById('movie_title').classList.add('validation-error');
+      event.preventDefault();
+      return;
+    }
+    });
+</script>
+
+<style>
+  .validation-error {
+    border: 1px solid red;
+  }
+</style>
+
+```
+
+
+![Captura de pantalla de 2023-12-21 00-27-43](https://github.com/miguelvega/PracticaCalificada4/assets/124398378/3701d87e-292d-42d7-9fe2-13ccd729aad7)
+
+![Captura de pantalla de 2023-12-21 00-27-52](https://github.com/miguelvega/PracticaCalificada4/assets/124398378/ed975132-8113-4770-8665-59e6d84c1fe1)
+
 
 ### 3. En el código utilizado en la sección de eventos y funciones callback, supongamos que no puedes modificar el código del servidor para añadir la clase CSS adult a las filas de la tabla movies. ¿Cómo identificaría las filas que están ocultas utilizando sólo código JavaScript del lado cliente?
 
