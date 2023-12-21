@@ -4238,3 +4238,42 @@ Completed 200 OK in 93ms (Views: 76.8ms | ActiveRecord: 0.9ms | Allocations: 711
   [1m[36mTRANSACTION (7.2ms)[0m  [1m[36mcommit transaction[0m
   [1m[36mReview Load (0.3ms)[0m  [1m[34mSELECT "reviews".* FROM "reviews" WHERE "reviews"."moviegoer_id" = ?[0m  [["moviegoer_id", 1]]
   [1m[36mReview Load (0.2ms)[0m  [1m[34mSELECT "reviews".* FROM "reviews" WHERE "reviews"."moviegoer_id" = ?[0m  [["moviegoer_id", 2]]
+  [1m[36mMovie Load (0.3ms)[0m  [1m[34mSELECT "movies".* FROM "movies"[0m
+  [1m[36mMoviegoer Load (0.4ms)[0m  [1m[34mSELECT "moviegoers".* FROM "moviegoers"[0m
+  [1m[36mReview Load (0.6ms)[0m  [1m[34mSELECT "reviews".* FROM "reviews"[0m
+Started GET "/" for 127.0.0.1 at 2023-12-20 11:40:32 -0500
+  [1m[36mActiveRecord::SchemaMigration Pluck (0.3ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+Started GET "/movies" for 127.0.0.1 at 2023-12-20 11:40:32 -0500
+Processing by MoviesController#index as HTML
+  Rendering layout layouts/application.html.haml
+  Rendering movies/index.html.haml within layouts/application
+  [1m[36mMovie Load (0.2ms)[0m  [1m[34mSELECT "movies".* FROM "movies"[0m
+  ↳ app/views/movies/index.html.haml:15
+  Rendered movies/index.html.haml within layouts/application (Duration: 34.2ms | Allocations: 31068)
+  Rendered layout layouts/application.html.haml (Duration: 96.9ms | Allocations: 58855)
+Completed 200 OK in 131ms (Views: 102.4ms | ActiveRecord: 1.0ms | Allocations: 71386)
+
+
+Started GET "/movies/5" for 127.0.0.1 at 2023-12-20 11:40:35 -0500
+Processing by MoviesController#show as HTML
+  Parameters: {"id"=>"5"}
+  [1m[36mMovie Load (0.2ms)[0m  [1m[34mSELECT "movies".* FROM "movies" WHERE "movies"."id" = ? LIMIT ?[0m  [["id", 5], ["LIMIT", 1]]
+  ↳ app/controllers/movies_controller.rb:7:in `show'
+  Rendering layout layouts/application.html.haml
+  Rendering movies/show.html.haml within layouts/application
+  Rendered movies/show.html.haml within layouts/application (Duration: 10.1ms | Allocations: 5012)
+  Rendered layout layouts/application.html.haml (Duration: 16.1ms | Allocations: 7498)
+Completed 200 OK in 21ms (Views: 17.9ms | ActiveRecord: 0.2ms | Allocations: 10037)
+
+
+Started GET "/movies" for 127.0.0.1 at 2023-12-20 11:40:37 -0500
+Processing by MoviesController#index as HTML
+  Rendering layout layouts/application.html.haml
+  Rendering movies/index.html.haml within layouts/application
+  [1m[36mMovie Load (0.1ms)[0m  [1m[34mSELECT "movies".* FROM "movies"[0m
+  ↳ app/views/movies/index.html.haml:15
+  Rendered movies/index.html.haml within layouts/application (Duration: 2.1ms | Allocations: 881)
+  Rendered layout layouts/application.html.haml (Duration: 5.7ms | Allocations: 3374)
+Completed 200 OK in 7ms (Views: 6.3ms | ActiveRecord: 0.1ms | Allocations: 3756)
+
+
