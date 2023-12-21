@@ -282,8 +282,94 @@ En resumen, order es específico de ActiveRecord y se utiliza para ordenar resul
     
 ## Preguntas 4: (estas preguntas son utilizando el repositorio de todas tus actividades relacionada a JavaScript, por lo tanto, no hay respuestas únicas) - 6 puntos
 
+
 ### 1. Un inconveniente de la herencia de prototipos es que todos los atributos (propiedades) de los objetos son públicos. Sin embargo, podemos aprovechar las clausuras para obtener atributos privados. Crea un sencillo constructor para los objetos User que acepte un nombre de usuario y una contraseña, y proporcione un método checkPassword que indique si la contraseña proporcionada es correcta, pero que deniegue la inspección de la contraseña en sí. Esta expresión de “sólo métodos de acceso” se usa ampliamente en jQuery. Sugerencia:  El constructor debe devolver un objeto en el que una de sus propiedades es una función que aprovecha las clausuras de JavaScript para ‘recordar’ la contraseña proporcionada inicialmente al constructor. El objeto devuelto no debería tener ninguna propiedad que contenga la contraseña).
 
+```javascript
+function User(username, password) {
+  // Objeto que se devolverá
+  var userObject = {};
+
+  // Función interna que aprovecha las clausuras para recordar la contraseña
+  function checkPassword(inputPassword) {
+    // Compara la contraseña proporcionada con la almacenada
+    return inputPassword === password;
+  }
+
+  // Agregar la función checkPassword al objeto retornado
+  userObject.checkPassword = checkPassword;
+
+  // Otras propiedades y métodos públicos si es necesario
+  userObject.getUsername = function () {
+    return username;
+  };
+
+  // Devolver el objeto con la función checkPassword
+  return userObject;
+}
+
+// Crear un usuario
+var myUser = User("miguel", "miContraseña");
+
+// Intentar acceder a la contraseña directamente generará un error
+try {
+  console.log(myUser.password);
+} catch (error) {
+  console.error(error.message); // Salida: Cannot read property 'password' of undefined
+}
+
+// Comprobar la contraseña utilizando el método checkPassword
+console.log(myUser.checkPassword("contraseñaIncorrecta")); // Salida: false
+console.log(myUser.checkPassword("miContraseña")); // Salida: true
+
+// Acceder al nombre de usuario
+console.log(myUser.getUsername()); // Salida: miguel
+
+
+```
+Explicaremos el codigo : 
+
+Definición del constructor User:
+- Se define una función llamada User que acepta dos parámetros: username y password.
+- Esta función actuará como un constructor para crear objetos User.
+
+Creación del objeto userObject:
+- Se crea un objeto vacío llamado userObject que será devuelto al final del constructor.
+
+Función interna checkPassword:
+- Se define una función interna llamada checkPassword dentro del constructor.
+- Esta función utiliza una clausura para acceder a la variable password del ámbito del constructor.
+
+Agregar la función checkPassword al objeto retornado:
+- La función checkPassword se agrega como un método llamado checkPassword al objeto userObject. Este método permite comprobar si una contraseña proporcionada es igual a la contraseña almacenada.
+
+Otras propiedades y métodos públicos:
+- Se agrega un método llamado getUsername al objeto userObject, que devuelve el nombre de usuario (username).
+- En este caso, el único atributo público es el nombre de usuario.
+
+Devolver el objeto userObject:
+- El constructor devuelve el objeto userObject que tiene las funciones checkPassword y getUsername, así como las variables privadas username y password gracias a las clausuras.
+
+Crear un usuario:
+- Se crea un usuario llamado myUser invocando el constructor User con el nombre de usuario "miguel" y la contraseña "miContraseña".
+
+Intentar acceder a la contraseña directamente:
+- Se intenta acceder directamente a la propiedad password de myUser, lo cual generará un error ya que password es privado.
+
+Comprobar la contraseña utilizando el método checkPassword:
+- Se utiliza el método checkPassword para comprobar si la contraseña proporcionada es correcta.
+- Se imprime en la consola el resultado de las comparaciones.
+
+Acceder al nombre de usuario:
+
+- Se utiliza el método getUsername para obtener y mostrar el nombre de usuario. En este caso, se imprimirá "miguel"
+
+En resumen, este código presenta un constructor de objetos User que emplea clausuras para salvaguardar la privacidad de la contraseña. La función interna checkPassword accede a la variable password gracias a las clausuras. Este método se encarga de comparar la contraseña proporcionada con la almacenada , devolviendo true si son idénticas y false en caso contrario. Además, se ha implementado la recomendación de restringir el acceso directo a la contraseña, de manera que cualquier intento de acceder a myUser.password resultará en un error.
+La utilización de clausuras también es destacable, ya que permite recordar la contraseña. La función interna checkPassword retiene la contraseña inicialmente proporcionada al constructor gracias a las clausuras. Este enfoque asegura la integridad de la información y contribuye a la privacidad de los datos del usuario.
+
+Ejecutamos y vemos losm resultados:
+
+![Captura de pantalla de 2023-12-20 23-18-00](https://github.com/miguelvega/PracticaCalificada4/assets/124398378/636c2a49-e19b-41c3-9309-ba2e80ccf0c4)
 
 
 ### 2. Extienda la función de validación en ActiveModel  para generar automáticamente código JavaScript que valide las entradas del formulario antes de que sea enviado. Por ejemplo, puesto que el modelo Movie de RottenPotatoes requiere que el título de cada película sea distinto de la cadena vacía, el código JavaScript deberías evitar que el formulario “Add New Movie” se enviara si no se cumplen los criterios de validación, mostrar un mensaje de ayuda al usuario, y resaltar el(los) campo(s) del formulario que ocasionaron los problemas de validación. Gestiona, al menos, las validaciones integradas, como que los títulos sean distintos de cadena vacía, que las longitudes máximas y mínima de la cadena de caracteres sean correctas, que los valores numéricos estén dentro de los límites de los rangos, y para puntos adicionales, realiza las validaciones basándose en expresiones regulares.
