@@ -3,6 +3,7 @@
 ## Preguntas
 
 ## 2. Practiquemos la herencia y la programación orientada a objetos en Javascript. Diseña 2 clases, una llamada "Pokemon" y otra llamada "Charizard". Las clases deben hacer lo siguiente:
+
 Clase Pokémon: <br>
 • El constructor toma 3 parámetros (HP, ataque, defensa) <br>
 • El constructor debe crear 6 campos (HP, ataque, defensa, movimiento, nivel, tipo). Los valores de (mover, nivelar, tipo) debe inicializarse en ("", 1, ""). <br>
