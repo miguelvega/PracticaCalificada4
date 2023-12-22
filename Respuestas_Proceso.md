@@ -402,11 +402,9 @@ Ahora, estudiemos la parte principal de la estructura de árbol en el DOM de la 
 Document
 └── <html>
     └── <head>
-        └── <meta>
-        └── <meta>
-        └── <title>
+
     └── <body>
-        └── <h2>
+        └── <h2>Create New Movie</h2>
         └── <form class="form">
             └── <label for="movie_title" class="col-form-label">
             └── <input id="movie_title" class="form-control" name="movie[title]" type="text">
