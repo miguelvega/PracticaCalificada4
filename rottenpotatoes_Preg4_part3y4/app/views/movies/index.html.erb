@@ -1,0 +1,91 @@
+<!--  This file is app/views/movies/index.html.erb -->
+<h2>All Movies</h2>
+<div id="ratings_form">
+  <% @all_ratings.each do |rating| %>
+    <div class="form-check form-check-inline">
+      <%= check_box_tag "ratings[#{rating}]", "1", @ratings_to_show.include?(rating), class: 'form-check-input' %>
+      <%= label_tag "ratings[#{rating}]", rating, class: 'form-check-label' %>
+    </div>
+  <% end %>
+  
+</div>
+
+<table class="table table-striped col-md-12" id="movies">
+  <thead>
+    <tr>
+      <th>Nro</th>
+      <th class="<%=@title_header_class%>" ><%= link_to "Movie Title", movies_path(sort: 'title', direction: toggle_direction('title'), ratings: hash_ratings(@ratings_to_show)), id: 'title_header' %></th>
+      <th>Rating</th>
+      <th class="<%=@release_date_header_class%>" ><%= link_to "Release Date", movies_path(sort: 'release_date', direction: toggle_direction('release_date'), ratings: hash_ratings(@ratings_to_show)), id: 'release_date_header' %></th>
+      <th>More Info</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @movies.each do |movie| %>
+      <%= content_tag :tr, class: 'row-hover', onmouseover: "this.style.backgroundColor='#FFFF00'", onmouseout: "this.style.backgroundColor=''" do %>
+        <td>
+         <%= movie.id %>
+        </td>
+        <td>
+          <%= movie.title %>
+        </td>
+        <td>
+          <%= movie.rating %>
+        </td>
+        <td>
+          <%= movie.release_date %>
+        </td>
+        <td>
+          <%= link_to "More about #{movie.title}", movie_path(movie) %>
+        </td>
+      <% end %>
+    <% end %>
+  </tbody>
+</table>
+
+<%= link_to 'Add new movie', new_movie_path, :class => 'btn btn-primary' %>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const checkboxes = document.querySelectorAll('#ratings_form input[type="checkbox"]');
+    const movies = <%= raw @movies.to_json %>; // Convierte las películas a un array de JavaScript
+
+    function updateURL() {
+      const ratings = Array.from(checkboxes)
+        .filter(cb => cb.checked)
+        .map(cb => cb.name.split("[")[1].split("]")[0]);
+
+      const url = new URL(window.location.href);
+      url.searchParams.set("ratings", ratings.join(","));
+
+      window.location.href = url.toString();
+    }
+
+    function logUncheckedMovies() {
+      const uncheckedMovies = Array.from(checkboxes)
+        .filter(cb => !cb.checked)
+        .map(cb => cb.name.split("[")[1].split("]")[0]);
+
+      console.log('Películas con rating desmarcado:', uncheckedMovies);
+
+      // Mostrar en consola los nombres de todas las películas correspondientes a los checkboxes desmarcados
+      uncheckedMovies.forEach(rating => {
+        const moviesWithRating = movies.filter(movie => movie.rating === rating);
+        const movieNames = moviesWithRating.map(movie => movie.title);
+        console.log(`Películas con rating ${rating}:`, movieNames);
+      });
+    }
+
+    checkboxes.forEach(function (checkbox) {
+      checkbox.addEventListener('change', function () {
+        if (Array.from(checkboxes).every(cb => !cb.checked)) {
+          // Si todos los checkboxes están desmarcados, marcar todos
+          checkboxes.forEach(cb => cb.checked = true);
+        }
+
+        updateURL();
+        logUncheckedMovies();
+      });
+    });
+  });
+</script>
