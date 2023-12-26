@@ -3,6 +3,7 @@
 ## Preguntas
 
 ## 2. Practiquemos la herencia y la programación orientada a objetos en Javascript. Diseña 2 clases, una llamada "Pokemon" y otra llamada "Charizard". Las clases deben hacer lo siguiente:
+
 Clase Pokémon: <br>
 • El constructor toma 3 parámetros (HP, ataque, defensa) <br>
 • El constructor debe crear 6 campos (HP, ataque, defensa, movimiento, nivel, tipo). Los valores de (mover, nivelar, tipo) debe inicializarse en ("", 1, ""). <br>
@@ -374,6 +375,181 @@ Ejecutamos y vemos losm resultados:
 
 ### 2. Extienda la función de validación en ActiveModel  para generar automáticamente código JavaScript que valide las entradas del formulario antes de que sea enviado. Por ejemplo, puesto que el modelo Movie de RottenPotatoes requiere que el título de cada película sea distinto de la cadena vacía, el código JavaScript deberías evitar que el formulario “Add New Movie” se enviara si no se cumplen los criterios de validación, mostrar un mensaje de ayuda al usuario, y resaltar el(los) campo(s) del formulario que ocasionaron los problemas de validación. Gestiona, al menos, las validaciones integradas, como que los títulos sean distintos de cadena vacía, que las longitudes máximas y mínima de la cadena de caracteres sean correctas, que los valores numéricos estén dentro de los límites de los rangos, y para puntos adicionales, realiza las validaciones basándose en expresiones regulares.
 
+En primera instancia veamos con se encuentra nuestra vista new.html.erb util para que el usuario interactue con nuestra apliaccion y pueda añadir una nueva pelicula 
+
+```
+<h2>Create New Movie</h2>
+
+<%= form_tag movies_path, :class => 'form' do %>
+  <%= label :movie, :title, 'Title', :class => 'col-form-label' %>
+  <%= text_field :movie, :title, :class => 'form-control' %>
+  <%= label :movie, :rating, 'Rating', :class => 'col-form-label'  %>
+  <%= select :movie, :rating, ['G','PG','PG-13','R'], {}, {:class => 'form-control col-1'} %>
+  <%= label :movie, :release_date, 'Released On', :class => 'col-form-label'  %>
+  <%= date_select :movie, :release_date, {}, :class => 'form-control col-2 d-inline' %>
+  <br/>
+  <%= submit_tag 'Save Changes', :class => 'btn btn-primary' %>
+  <%= link_to 'Cancel', movies_path, :class => 'btn btn-secondary' %>
+<% end %>
+
+```
+Cuando se utiliza el helper text_field en Rails, se crea un campo de entrada con un identificador (id) basado en el nombre del modelo y el atributo. En este caso, el modelo es :movie y el atributo es :title, por lo que el identificador se convierte en movie_title. La elección de movie_title en este contexto se basa en la convención utilizada en el formulario HTML.
+
+
+Ahora, estudiemos la parte principal de la estructura de árbol en el DOM de la vista new , que se podría representar de la siguiente manera:
+
+```
+Document
+└── <html>
+    └── <head>
+
+    └── <body>
+        └── <h2>Create New Movie</h2>
+        └── <form class="form">
+            └── <label for="movie_title" class="col-form-label">
+            └── <input id="movie_title" class="form-control" name="movie[title]" type="text">
+            └── <label for="movie_rating" class="col-form-label">
+            └── <select id="movie_rating" class="form-control col-1" name="movie[rating]">
+            └── <label for="movie_release_date" class="col-form-label">
+            └── <select id="movie_release_date" class="form-control col-2 d-inline" name="movie[release_date(1i)]">
+            └── <br>
+            └── <input type="submit" value="Save Changes" class="btn btn-primary">
+            └── <a href="/movies" class="btn btn-secondary">
+ 
+
+```
+Esto representa la jerarquía de nodos en el DOM. Cada elemento HTML y sus atributos se convierten en nodos en este árbol. Los nodos secundarios están indentados para mostrar su relación con sus nodos primarios. En este caso, podemos ver cómo los elementos `<form>`, `<label>`, `<input>`, `<select>`, `<br>`, `<input>` y `<a>`están anidados dentro de otros elementos según su posición en el código fuente.
+
+El DOM "ve" el resultado HTML que se renderiza en el navegador, ya sea que haya sido generado estáticamente en el código fuente original o de manera dinámica mediante el procesamiento en el servidor con Ruby on Rails. En última instancia, el navegador trabaja con la representación final del DOM, sin conocer los detalles de cómo se generó. Por ejemplo:
+
+En el HTML sin Ruby on Rails:
+
+```
+<input class="form-control" id="movie_title" name="movie[title]" type="text" />
+
+```
+
+Este código HTML es estático y puede escribirse directamente en un archivo HTML. Es la representación que verías si inspeccionas el código fuente de la página web en el navegador con Ctrl+U. Entonces, cuando usamos la extensión .html para un archivo en un proyecto de Ruby on Rails, estamos indicando que el contenido es HTML estático, sin ninguna incrustación de código Ruby. Este tipo de archivo se interpreta como HTML puro y no permite la ejecución de código Ruby en el contexto del archivo. Es adecuado para páginas que no requieren lógica dinámica y cuyo contenido es fijo.
+
+Usando Ruby on Rails
+
+```ruby
+
+<%= text_field :movie, :title, :class => 'form-control' %>
+
+```
+
+Esta línea de código Ruby on Rails se procesa en el servidor antes de enviar la respuesta al cliente. El código Ruby on Rails genera dinámicamente el HTML necesario para el formulario. Cuando el navegador recibe la respuesta del servidor, solo ve el resultado HTML y no tiene conocimiento del código Ruby que lo generó. Entonces, cuando usamos la extensión .html.erb, estamos indicando que el archivo contiene HTML con incrustaciones de código Ruby. Este tipo de archivo permite la ejecución de código Ruby entre las etiquetas <% %> y <%= %>. Podemos utilizar variables, bucles y otras construcciones de Ruby para generar contenido dinámico.
+
+<br>
+Recordemos que el diseño principal (o layout) de nuestra aplicación se encuentra en application.html.erb, que se utiliza para envolver todas las vistas. Esto se utiliza como un marco general para todas las páginas de la aplicación, y las vistas específicas, como new.html.erb, se insertan en el área designada (<%= yield %>) del archico application.html.erb, lo que permite mantener la consistencia en la apariencia y la estructura de nuestro sitio. Por tal motivo, fueron omitidos para simplificar el DOM y para centrarnos en las validaciones de lado del cliente en la vista new.html.erb.
+
+Para ello, agregamos las siguiente lineas de codigo en la parte final de nuestro archivo new.html.erb para evitar que el usuario agregue peliculas con los titulos en blanco. Estas validación que se estan agregando con el script JavaScript son del lado del cliente, en cambio las validaciones que se hicieron en el modelo en Rails en el archivo movie.rb generalmente se aplican en el lado del servidor.
+
+Por lo cual, utilizamos un script JavaScript y una hoja de estilo CSS para realizar validaciones del lado del cliente y resaltar los campos con errores.
+
+```
+
+<script>
+  document.querySelector('.form').addEventListener('submit', function (event) {
+    document.getElementById('movie_title').classList.remove('validation-error');
+    var title = document.querySelector('#movie_title').value;
+    if (title.trim() === '') {
+      alert('El título no puede estar vacío');
+      document.getElementById('movie_title').classList.add('validation-error');
+      event.preventDefault();
+      return;
+    }
+    });
+</script>
+
+<style>
+  .validation-error {
+    border: 1px solid red;
+  }
+</style>
+
+```
+
+- document.querySelector('.form'): Esto selecciona el primer elemento en el documento que tiene la clase 'form'. En el contexto de formularios HTML, esto suele ser el formulario al que se refiere la página.
+
+- addEventListener('submit', function (event) {: Agrega un "escuchador de eventos" al formulario seleccionado. Este escuchador está configurado para activarse cuando el formulario se envía (submit). La función anonima que se pasa como segundo argumento se ejecutará cuando se produzca el evento de envío.
+
+- document.getElementById('movie_title') busca y devuelve el elemento del DOM con el identificador movie_title, es decir devolverá el objeto que representa ese campo de entrada. Con lo cual se podria luego acceder a las propiedades y métodos de este objeto.
+  
+- .classList.remove('validation-error') quita la clase 'validation-error' de su lista de clases. Esto se hace para eliminar cualquier estilo de validación previo, es decir, elimina la clase 'validation-error' del elemento con ID 'movie_title'
+
+- var title = document.querySelector('#movie_title').value;: Esto selecciona el elemento con el ID 'movie_title' y obtiene el valor de su propiedad value, que es el texto que el usuario ha ingresado en el campo de entrada y lo almacena en la variable title.
+  
+- if (title.trim() === '') {: Aquí se verifica si el título está vacío después de eliminar cualquier espacio en blanco al principio y al final del texto con el metodo trim().
+
+- alert('El título no puede estar vacío');: Si el título está vacío, se muestra una alerta al usuario indicándole que el título no puede estar vacío.
+
+- document.getElementById('movie_title').classList.add('validation-error');: Se agrega la clase 'validation-error' al elemento con el ID 'movie_title', lo que podría cambiar su apariencia para indicar un error.
+
+- event.preventDefault();: Evita el comportamiento predeterminado del formulario, que es enviar los datos al servidor. Esto detiene la acción de envío del formulario.
+
+- return;: Sale de la función si el título está vacío.
+
+- <style> validation-error { border: 1px solid red; } </style> : Estas líneas de CSS definen un estilo para la clase 'validation-error'. En este caso, están aplicando un borde de 1 píxel de ancho y de color rojo al elemento con esta clase. Esto es consistente con la interacción en JavaScript, donde se agrega o elimina la clase 'validation-error' según si el título está vacío o no.
+
+
+En resumen, dentro del script de Javascript estamos agregando un event listener al formulario con la clase 'form' que escucha el evento 'submit'.Cuando se envía el formulario, se remueve cualquier estilo de validación anterior al eliminar la clase 'validation-error' del campo de entrada con el ID 'movie_title'.Luego, se obtiene el valor del campo de título y se verifica si está vacío después de quitar espacios en blanco. Si el campo está vacío, se muestra una alerta, se resalta el campo con la clase 'validation-error', se previene el envío del formulario y se sale de la función. Ademas, el bloque de estilo CSS define la apariencia de los campos de entrada con la clase 'validation-error'. En este caso, agrega un borde rojo alrededor del campo.
+
+
+![Captura de pantalla de 2023-12-21 00-27-43](https://github.com/miguelvega/PracticaCalificada4/assets/124398378/3701d87e-292d-42d7-9fe2-13ccd729aad7)
+
+![Captura de pantalla de 2023-12-21 00-27-52](https://github.com/miguelvega/PracticaCalificada4/assets/124398378/ed975132-8113-4770-8665-59e6d84c1fe1)
+
+
+```
+html
+└── head
+    ├── title (Rotten Potatoes!)
+    ├── link (stylesheet: bootstrap.min.css)
+    ├── link (stylesheet: application.self.css)
+    ├── script (jquery)
+    ├── script (jquery_ujs)
+    └── script (application.self.js)
+└── body
+    ├── nav (navbar)
+    │   └── h1 (title: Rotten Potatoes!)
+    ├── div (container)
+    │   └── main (main)
+    │       └── h2 (Create New Movie)
+    │       └── form (form, action="/movies")
+    │           ├── input (utf8)
+    │           ├── input (authenticity_token)
+    │           ├── label (for="movie_title", Title)
+    │           ├── input (text, name="movie[title]", id="movie_title")
+    │           ├── label (for="movie_rating", Rating)
+    │           ├── select (name="movie[rating]", id="movie_rating")
+    │               └── option (value="G", G)
+    │               └── option (value="PG", PG)
+    │               └── option (value="PG-13", PG-13)
+    │               └── option (value="R", R)
+    │           ├── label (for="movie_release_date", Released On)
+    │           ├── select (id="movie_release_date_1i", name="movie[release_date(1i)]")
+    │               └── option (value="2018", 2018)
+    │               └── option (value="2019", 2019)
+    │               └── ... (opciones para otros años)
+    │           ├── select (id="movie_release_date_2i", name="movie[release_date(2i)]")
+    │               └── option (value="1", January)
+    │               └── option (value="2", February)
+    │               └── ... (opciones para otros meses)
+    │           ├── select (id="movie_release_date_3i", name="movie[release_date(3i)]")
+    │               └── option (value="1", 1)
+    │               └── option (value="2", 2)
+    │               └── ... (opciones para otros días)
+    │           ├── br
+    │           ├── input (submit, name="commit", value="Save Changes")
+    │           └── a (href="/movies", class="btn btn-secondary")
+    │       └── script
+    │       └── style (validation-error)
+    └── script (validación del formulario)
+
+
+```
 
 ### 3. En el código utilizado en la sección de eventos y funciones callback, supongamos que no puedes modificar el código del servidor para añadir la clase CSS adult a las filas de la tabla movies. ¿Cómo identificaría las filas que están ocultas utilizando sólo código JavaScript del lado cliente?
 
