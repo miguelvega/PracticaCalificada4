@@ -591,28 +591,28 @@ Por el siguiente codigo, ya que no utilizaremos el formulario de envío tradicio
 </div>
 
 ```
-- <div id="ratings_form">: Abre un contenedor <div> con el atributo de identificación (id) establecido en "ratings_form". Este contenedor probablemente contendrá un conjunto de checkboxes relacionados con las clasificaciones de las películas.
+- `<div id="ratings_form">`: Abre un contenedor <div> con el atributo de identificación (id) establecido en "ratings_form". Este contenedor probablemente contendrá un conjunto de checkboxes relacionados con las clasificaciones de las películas.
 
-- <% @all_ratings.each do |rating| %>: Inicia un bucle Ruby que itera sobre cada elemento en la colección @all_ratings. Esta colección probablemente contiene las clasificaciones disponibles para las películas.
+- `<% @all_ratings.each do |rating| %>`: Inicia un bucle Ruby que itera sobre cada elemento en la colección @all_ratings. Esta colección probablemente contiene las clasificaciones disponibles para las películas.
 
-- <div class="form-check form-check-inline">: Abre un nuevo contenedor <div> con clases de Bootstrap (form-check y form-check-inline). Esto se usa comúnmente para estilizar checkboxes y radio buttons en formularios.
+- `<div class="form-check form-check-inline">`: Abre un nuevo contenedor <div> con clases de Bootstrap (form-check y form-check-inline). Esto se usa comúnmente para estilizar checkboxes y radio buttons en formularios.
 
-- <%= check_box_tag "ratings[#{rating}]", "1", @ratings_to_show.include?(rating), class: 'form-check-input' %>: Genera un checkbox. Desglosemos los parámetros:
+- `<%= check_box_tag "ratings[#{rating}]", "1", @ratings_to_show.include?(rating), class: 'form-check-input' %>`: Genera un checkbox. Desglosemos los parámetros:
     - "ratings[#{rating}]": Nombre del checkbox, probablemente para asociarlo a una clasificación específica.
     - "1": Valor predeterminado del checkbox cuando está marcado.
     - @ratings_to_show.include?(rating): Verifica si la clasificación actual (rating) debe estar marcada inicialmente según el estado actual del modelo (@ratings_to_show).
     - class: 'form-check-input': Clase de Bootstrap para estilizar el checkbox.
 
-- <%= label_tag "ratings[#{rating}]", rating, class: 'form-check-label' %>: Genera una etiqueta asociada al checkbox para describir la clasificación. Desglosemos los parámetros:
+- `<%= label_tag "ratings[#{rating}]", rating, class: 'form-check-label' %>`: Genera una etiqueta asociada al checkbox para describir la clasificación. Desglosemos los parámetros:
     - "ratings[#{rating}]": Asocia la etiqueta al checkbox con el mismo nombre.
     - rating: Texto de la etiqueta, que probablemente sea la clasificación.
     - class: 'form-check-label': Clase de Bootstrap para estilizar la etiqueta.
 
-- <% end %>: Cierra el bucle Ruby.
+- `<% end %>`: Cierra el bucle Ruby.
 
-- </div>: Cierra el contenedor <div> del paso 3.
+- `</div>`: Cierra el contenedor <div> del paso 3.
 
-- </div>: Cierra el contenedor principal <div> con identificación "ratings_form".
+- `</div>`: Cierra el contenedor principal <div> con identificación "ratings_form".
 
 En resumen, este código genera un conjunto de checkboxes en una vista de Rails para clasificaciones de películas. Utiliza un bucle para crear checkboxes y etiquetas asociadas a partir de un conjunto predefinido de clasificaciones (@all_ratings) que es un metodo de clase del modelo movie. La marca de cada checkbox depende de si la clasificación correspondiente está presente en @ratings_to_show, una variable proporcionada por el controlador. Este código permite al usuario filtrar películas por clasificación mediante checkboxes en la interfaz
 
