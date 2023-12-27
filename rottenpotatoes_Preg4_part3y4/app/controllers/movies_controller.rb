@@ -18,10 +18,14 @@ class MoviesController < ApplicationController
 
     if @ratings_to_show.is_a?(Hash)
       @ratings_to_show = @ratings_to_show.keys
+      flash[:notice] = 'Hash'
+
     end
     
     if @ratings_to_show.is_a?(String)
       @ratings_to_show = @ratings_to_show.split(',')
+      flash[:notice] = 'String'
+
     end
 
     @movies = Movie.with_ratings(@ratings_to_show)
