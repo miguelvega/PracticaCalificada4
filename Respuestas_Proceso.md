@@ -627,6 +627,30 @@ end
 ```
 Pues, la manipulación de @ratings_to_show como Hash o String depende de cómo se almacenan y pasan los datos desde y hacia la vista.
 
+Cuando el usuario cambia de ordenacion o vuelve a la vista index en ese caso entramos a :
+
+```ruby
+if @ratings_to_show.is_a?(Hash)
+      @ratings_to_show = @ratings_to_show.keys
+      flash[:notice] = 'Hash'
+end
+
+```
+ya que en la url se cumple `params[:sort].nil? && params[:ratings].nil?` por tal motivo estamos usamos la funcion privada `save_session_params` asi como tambien la funcion privada `hash_ratings` debido a que la funcion anterior necesita de esta funcion. Por ello, en la linea `@ratings_to_show = params[:ratings] || session[:ratings] || @all_ratings` quedaria que `@ratings_to_show = session[:ratings]` debido a que params[:ratings] es nil. Analogamente cuando cambiamos de ordenacion.
+
+Ahora bien cuando el usuario selecciona clasificaciones usando checkboxes. Por ejemplo, en la siguiente URL `http://localhost:3000/movies?ratings=G%2CR`, los datos de clasificación están codificados en una cadena, y cada clasificación está separada por %2C, que es la codificación URL de la coma (,). Por lo tanto, en este caso, deberíamos usar la parte del código que maneja @ratings_to_show como una cadena. 
+
+```ruby
+if @ratings_to_show.is_a?(String)
+      @ratings_to_show = @ratings_to_show.split(',')
+      flash[:notice] = 'String'
+end
+
+```
+Esto se encargará de dividir la cadena en un array de clasificaciones. En el ejemplo proporcionado, @ratings_to_show se asignaría a ['G', 'R'] después de la división.
+`
+
+
 
 Luego, modificamos el metodo de clase `with_ratings` de modelo movie dado en el archivo movie.rb, recuerda que tiene como propósito filtrar las películas según las clasificaciones proporcionadas.
 
@@ -699,10 +723,169 @@ En resumen, la función with_ratings permite filtrar las películas según las c
 </script>
 
 ```
+Este código JavaScript está diseñado para realizar dos tareas principales en respuesta a los cambios en los checkboxes de la vista:
+
+- updateURL(): Esta función se encarga de actualizar la URL en el navegador de acuerdo con los checkboxes seleccionados. Extrae los valores de los checkboxes marcados, los une en una cadena separada por comas y actualiza el parámetro "ratings" en la URL. Luego, redirige la página al nuevo URL.
+
+- logUncheckedMovies(): Esta función se encarga de mostrar información en la consola del navegador acerca de las películas cuyos checkboxes han sido desmarcados. Muestra las categorías (ratings) desmarcadas y, para cada una, muestra los nombres de las películas correspondientes.
+
+En la consola del navegador, verías mensajes de este estilo:
+
+- "Películas con rating desmarcado: [PG, PG-13]"
+- "Películas con rating PG: ['Película 1', 'Película 2']"
+- "Películas con rating PG-13: ['Película 3', 'Película 4']"
+
+Esto proporciona información útil sobre qué películas están actualmente visibles en la vista y cuáles están ocultas debido a que su checkbox ha sido desmarcado.
+
+Ahora vamos a exlicar el codigo con detalle :
+
+Escucha del evento DOMContentLoaded:
+
+```javascript
+document.addEventListener('DOMContentLoaded', function () {
+```
+
+Esto asegura que el código dentro de esta función se ejecute después de que la estructura HTML haya sido completamente cargada.
+<br>
+
+Selección de Checkboxes:
+
+```javascript
+const checkboxes = document.querySelectorAll('#ratings_form input[type="checkbox"]');
+```
+Selecciona todos los elementos de tipo checkbox dentro del formulario con el id ratings_form y los almacena en la variable checkboxes.
+<br>
+
+Obtención de Datos de Películas:
+
+```javascript
+const movies = <%= raw @movies.to_json %>;
+```
+Obtiene datos de películas desde el backend y los convierte en un array de JavaScript, almacenado en la variable movies.
+<br>
+
+Función para Actualizar la URL:
+
+```javascript
+function updateURL() {
+  // ... (ver siguiente punto)
+}
+
+```
+
+Esta función se encarga de actualizar la URL según los checkboxes marcados.
+<br>
+
+Obtención de Ratings desde Checkboxes:
+
+```javascript
+const ratings = Array.from(checkboxes)
+  .filter(cb => cb.checked)
+  .map(cb => cb.name.split("[")[1].split("]")[0]);
+
+```
+Obtiene un array de ratings a partir de los checkboxes marcados. Se filtran los checkboxes marcados y se extraen los ratings de sus nombres.
+<br>
+
+Creación y Actualización de URL:
+
+```javascript
+const url = new URL(window.location.href);
+url.searchParams.set("ratings", ratings.join(","));
+window.location.href = url.toString();
+
+```
+
+Crea un nuevo objeto URL con la URL actual y actualiza el parámetro "ratings" con los ratings obtenidos. Luego, redirige a la nueva URL.
+<br>
+
+Función para Registrar Películas Desmarcadas:
+
+
+```javascript
+function logUncheckedMovies() {
+  // ... (ver siguiente punto)
+}
+
+```
+
+Esta función registra en la consola las películas cuyos checkboxes han sido desmarcados.
+<br>
+
+Obtención de Películas Desmarcadas:
+
+```javascript
+const uncheckedMovies = Array.from(checkboxes)
+  .filter(cb => !cb.checked)
+  .map(cb => cb.name.split("[")[1].split("]")[0]);
+
+```
+Obtiene un array de películas desmarcadas a partir de los checkboxes no marcados.
+<br>
+
+Registro de Películas Desmarcadas en Consola:
+
+```javascript
+console.log('Películas con rating desmarcado:', uncheckedMovies);
+// ... (ver siguiente punto)
+
+```
+
+Muestra en la consola las películas cuyos checkboxes han sido desmarcados.
+<br>
+
+Registro de Nombres de Películas Desmarcadas:
+
+
+```javascript
+uncheckedMovies.forEach(rating => {
+  const moviesWithRating = movies.filter(movie => movie.rating === rating);
+  const movieNames = moviesWithRating.map(movie => movie.title);
+  console.log(`Películas con rating ${rating}:`, movieNames);
+});
+
+```
+
+Para cada película desmarcada, filtra las películas con el mismo rating y muestra los nombres de esas películas en la consola
+<br>
+
+Event Listener para Cambios en Checkboxes:
+
+```javascript
+checkboxes.forEach(function (checkbox) {
+  // ... (ver siguiente punto)
+});
+
+```
+
+Establece un event listener para cada checkbox que escucha cambios.
+<br>
+
+Manejo de Cambios en Checkboxes:
+
+```javascript
+checkbox.addEventListener('change', function () {
+  if (Array.from(checkboxes).every(cb => !cb.checked)) {
+    checkboxes.forEach(cb => cb.checked = true);
+  }
+  updateURL();
+  logUncheckedMovies();
+});
+
+```
+
+Cuando hay cambios en los checkboxes, se verifica si todos están desmarcados, en cuyo caso se marcan todos. Luego, se llama a las funciones updateURL() y logUncheckedMovies() para reflejar los cambios en la URL y mostrar información en la consola.
+
+![Captura de pantalla de 2023-12-26 22-28-46](https://github.com/miguelvega/PracticaCalificada4/assets/124398378/0e49c3a2-64d5-475b-976e-dd0347790092)
 
 
 ### 4. Siguiendo la estrategia del ejemplo de jQuery de la misma sección anterior de eventos y funciones callback, utiliza JavaScript para implementar un conjunto de casillas de verificación (checkboxes) para la página que muestra la lista de películas, una por cada calificación (G, PG, etcétera), que permitan que las películas correspondientes permanezcan en la lista cuando están marcadas. Cuando se carga la página por primera vez, deben estar marcadas todas; desmarcar alguna de ellas debe esconder las películas con la clasificación a la que haga referencia la casilla desactivada.
 
+El codigo de la pregunta 4.3 se usa aqui tambien , con lo cual tenemos lo siguiente:
+
+![Captura de pantalla de 2023-12-26 22-29-49](https://github.com/miguelvega/PracticaCalificada4/assets/124398378/c94c3c5b-a920-416d-ac8e-5a0475590992)
 ### 5. Escribe el código AJAX necesario para crear menús en cascada basados en una asociación has_many. Esto es, dados los modelos de Rails A y B, donde A has_many (tiene muchos) B, el primer menú de la pareja tiene que listar las opciones de A, y cuando se selecciona una, devolver las opciones de B correspondientes y rellenar el menú B.
+
+
 
 ### 6. Extienda la funcionalidad del ejemplo dado en la actividad de AJAX: JavaScript asíncrono y XML de forma que, si el usuario expande u oculta repetidamente la misma fila de la tabla de películas, sólo se haga una única petición al servidor para la película en cuestión la primera vez. En otras palabras, implementa una memoria caché con JavaScript en el lado cliente para la información de la película devuelta en cada llamada AJAX.
